@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>DDD Workshop — Quiz (EN)</title>
+  <style>
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #16213e;
+      --accent: #e94560;
+      --text: #eaeaea;
+      --muted: #8888aa;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    header p {
+      margin-top: 0.6rem;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    #progress-wrap {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 1.5rem;
+    }
+
+    #progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    #progress-bar-bg {
+      background: var(--surface2);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    #quiz-card {
+      background: var(--surface);
+      border: 1px solid #ffffff10;
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 8px 40px #00000060;
+    }
+
+    #question-number {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.7rem;
+    }
+
+    #question-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .option {
+      background: var(--surface2);
+      border: 2px solid #ffffff10;
+      border-radius: var(--radius);
+      padding: 0.9rem 1.2rem;
+      cursor: pointer;
+      font-size: 0.97rem;
+      transition: border-color 0.2s, background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .option:hover:not(.disabled) {
+      border-color: var(--accent);
+      background: #ffffff08;
+    }
+
+    .option:active:not(.disabled) {
+      transform: scale(0.98);
+    }
+
+    .option .badge {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #ffffff10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .option.correct {
+      border-color: var(--correct);
+      background: #22c55e18;
+    }
+
+    .option.correct .badge {
+      background: var(--correct);
+      color: #fff;
+    }
+
+    .option.wrong {
+      border-color: var(--wrong);
+      background: #ef444418;
+    }
+
+    .option.wrong .badge {
+      background: var(--wrong);
+      color: #fff;
+    }
+
+    .option.disabled {
+      cursor: default;
+    }
+
+    #explanation {
+      margin-top: 1.2rem;
+      padding: 1rem 1.2rem;
+      background: #ffffff08;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+      line-height: 1.6;
+      display: none;
+    }
+
+    #explanation.show {
+      display: block;
+    }
+
+    #actions {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.6rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    button:hover {
+      opacity: 0.88;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    #results {
+      display: none;
+      background: var(--surface);
+      border: 1px solid #ffffff10;
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 700px;
+      text-align: center;
+      box-shadow: 0 8px 40px #00000060;
+    }
+
+    #results.show {
+      display: block;
+    }
+
+    #score-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      border: 6px solid var(--accent);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    #score-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    #score-total {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    #results h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    #results p {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    #results-list {
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #ffffff08;
+      font-size: 0.9rem;
+    }
+
+    .result-item .icon {
+      flex-shrink: 0;
+      font-size: 1rem;
+      margin-top: 1px;
+    }
+
+    .result-item .q {
+      flex: 1;
+    }
+
+    .result-item .q strong {
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .result-item .q span {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="tag">DDD Workshop</div>
+  <h1>Quiz — Domain-Driven Design</h1>
+  <p>10 questions drawn from a pool of 20 — a new mix every time</p>
+</header>
+
+<div id="progress-wrap">
+  <div id="progress-label">
+    <span id="progress-text">Question 1 / 20</span>
+    <span id="score-live">Score: 0</span>
+  </div>
+  <div id="progress-bar-bg">
+    <div id="progress-bar"></div>
+  </div>
+</div>
+
+<div id="quiz-card">
+  <div id="question-number"></div>
+  <div id="question-text"></div>
+  <div class="options" id="options"></div>
+  <div id="explanation"></div>
+  <div id="actions">
+    <button disabled id="next-btn">Next →</button>
+  </div>
+</div>
+
+<div id="results">
+  <div id="score-circle">
+    <span id="score-number">0</span>
+    <span id="score-total">/ 10</span>
+  </div>
+  <h2 id="results-title"></h2>
+  <p id="results-subtitle"></p>
+  <div id="results-list"></div>
+  <button onclick="restart()">🔄 Restart</button>
+</div>
+
+<script>
+  const POOL = [
+    // ── DDD Global ──────────────────────────────────────────────────────────
+    {
+      category: 'ddd',
+      q: "In the Backstage context, a developer uses the term UserListing in the code to refer to an ad. What is the problem?",
+      options: [
+        "The term is too short",
+        "It does not match the ubiquitous language of the domain (Ad)",
+        "The term should be in French",
+        "No problem — it is a valid technical rename"
+      ],
+      answer: 1,
+      explanation: "The Ubiquitous Language requires using Ad, the term shared with domain experts. Using UserListing introduces a technical bias that breaks the shared vocabulary between developers and business stakeholders."
+    },
+    {
+      category: 'ddd',
+      q: "What is a Bounded Context?",
+      options: [
+        "A technical boundary between two microservices",
+        "An explicit boundary within which a model and an ubiquitous language apply",
+        "A Maven or NPM module",
+        "A layer in a hexagonal architecture"
+      ],
+      answer: 1,
+      explanation: "A Bounded Context is an explicit boundary inside which a specific model and Ubiquitous Language have a precise meaning. The same term can have different meanings across different contexts — defining these boundaries carefully is a key architectural decision."
+    },
+    {
+      category: 'ddd',
+      q: "In Backstage, which subdomain is the Core Domain?",
+      options: [
+        "Payment",
+        "Alerting",
+        "Marketplace",
+        "Studio"
+      ],
+      answer: 2,
+      explanation: "The Core Domain is the subdomain that delivers the differentiating value of the application. For Backstage, that is the Marketplace — buying and selling instruments between musicians."
+    },
+    {
+      category: 'ddd',
+      q: "The Payment module of Backstage is classified as a Generic Subdomain. Why?",
+      options: [
+        "It is too complex to build in-house",
+        "It provides no differentiating value and can be outsourced (e.g., Stripe)",
+        "It is tied to a single Bounded Context",
+        "It does not use the Ubiquitous Language"
+      ],
+      answer: 1,
+      explanation: "A Generic Subdomain solves a common problem that is not specific to Backstage. Payment processing is a well-understood, commodity problem that third-party providers handle better. Outsourcing it lets the team focus on the Core Domain."
+    },
+    {
+      category: 'ddd',
+      q: "What is the Ubiquitous Language?",
+      options: [
+        "A programming language specific to DDD, such as Kotlin or Scala",
+        "The technical vocabulary used solely by developers to name classes",
+        "A shared vocabulary between domain experts and developers, reflected in the code",
+        "A UML diagram describing domain entities"
+      ],
+      answer: 2,
+      explanation: "The Ubiquitous Language is a shared vocabulary across all project stakeholders. It removes ambiguity and is reflected directly in the code. Developers are responsible for not introducing purely technical terms that would pollute this common language."
+    },
+    {
+      category: 'ddd',
+      q: "Which of the following best describes a Bounded Context?",
+      options: [
+        "A size limit imposed on Aggregates to prevent overly long transactions",
+        "An explicit boundary within which a specific model and Ubiquitous Language apply",
+        "A Maven or Gradle module grouping several microservices",
+        "The scope of a user story in the backlog"
+      ],
+      answer: 1,
+      explanation: "A Bounded Context is an explicit boundary inside which a model and a Ubiquitous Language have precise meaning. The same term may mean different things in two distinct contexts — carefully defining these boundaries is a major architectural decision."
+    },
+    {
+      category: 'ddd',
+      q: "Which of these statements about DDD is true?",
+      options: [
+        "DDD is a framework that must be applied in full or not at all",
+        "DDD is solely a relational database design approach",
+        "DDD is a toolbox that can be adopted incrementally, even on legacy code",
+        "DDD requires every microservice to be an Aggregate Root"
+      ],
+      answer: 2,
+      explanation: "DDD is not a framework but a toolbox. You can start with the simplest patterns — Value Objects, moving invariants into Entities, identifying Bounded Contexts — even on legacy codebases. The approach is iterative; beware of applying it too rigidly 'by the book'."
+    },
+    // ── Entity ──────────────────────────────────────────────────────────────
+    {
+      category: 'entity',
+      q: "Which of these characteristics belongs to an Entity?",
+      options: [
+        "Immutable",
+        "Defined solely by its value",
+        "Has an identifier and a lifecycle",
+        "Does not expose business methods"
+      ],
+      answer: 2,
+      explanation: "An Entity has its own identity (an ID that persists over time) and a lifecycle (it can change state). Encapsulation is important: it exposes business methods rather than raw properties, and it enforces its own business invariants."
+    },
+    {
+      category: 'entity',
+      q: "A musician can publish an Ad. The Ad can move from AVAILABLE to SOLD. Is it an Entity or a Value Object?",
+      options: [
+        "Value Object, because its price can change",
+        "Entity, because it has an identifier and a lifecycle",
+        "Value Object, because it is defined by its title",
+        "Neither"
+      ],
+      answer: 1,
+      explanation: "An Ad has its own identity and goes through a lifecycle (AVAILABLE → SOLD). Those are the two defining traits of an Entity. Two ads with the same title and price are still distinct objects."
+    },
+    {
+      category: 'entity',
+      q: "What is an Entity in DDD?",
+      options: [
+        "An object defined solely by its value, with no identity of its own",
+        "An object with its own identity, a lifecycle, and the ability to be mutated",
+        "A cluster of entities and Value Objects forming a consistent unit",
+        "An application service exposing business operations"
+      ],
+      answer: 1,
+      explanation: "An Entity is characterised by its own identity, its lifecycle, and its mutability. It carries business invariants and ensures the consistency of its state through business methods — rather than by exposing raw properties."
+    },
+    {
+      category: 'entity',
+      q: "In the Ad exercise, what makes the Ad an Entity rather than a Value Object?",
+      options: [
+        "An Ad has no lifecycle and is immutable",
+        "An Ad is defined solely by its title and price",
+        "An Ad has an identity and a lifecycle (available → sold)",
+        "An Ad can be freely duplicated if it has the same properties"
+      ],
+      answer: 2,
+      explanation: "An Ad transitions between states (available, sold) — that is its lifecycle. It also has its own identity that distinguishes it from another Ad with identical properties. Both criteria make it an Entity."
+    },
+    {
+      category: 'entity',
+      q: "In the Proposal exercise, is Proposal an Entity or a Value Object?",
+      options: [
+        "A Value Object, because it is defined by its proposed price",
+        "An Entity, because it has an identity and a lifecycle (waiting → accepted / rejected)",
+        "The root of the Ad Aggregate",
+        "A domain service orchestrating a complex business rule"
+      ],
+      answer: 1,
+      explanation: "A Proposal has a clear lifecycle: placed → waiting → accepted or rejected. It has its own identity and can change state. It is therefore an Entity, contained within the Ad Aggregate whose root enforces all invariants."
+    },
+    // ── Value Object ────────────────────────────────────────────────────────
+    {
+      category: 'vo',
+      q: "Price in Backstage is modelled as a Value Object. Which of these statements is true?",
+      options: [
+        "Two Price objects at €100 are different objects",
+        "A Price can be mutated directly",
+        "Two Price objects at €100 are considered equal",
+        "A Price has a unique identifier"
+      ],
+      answer: 2,
+      explanation: "A Value Object is defined by its value, not by its identity. Two Price instances with the same amount are equal. They are also immutable — applying a discount creates a new Price rather than modifying the existing one."
+    },
+    {
+      category: 'vo',
+      q: "What are the three fundamental properties of a Value Object?",
+      options: [
+        "Own identity, lifecycle, mutability",
+        "Defined by its value, immutable, no lifecycle",
+        "Aggregate root, transactional boundaries, consistency",
+        "Mutable, has an ID, can be shared across Aggregates"
+      ],
+      answer: 1,
+      explanation: "A Value Object is defined by its value (two VOs with the same value are equal), it is immutable (you create a new VO rather than mutating it), and it has no lifecycle of its own — it exists within the context of an entity or an Aggregate."
+    },
+    {
+      category: 'vo',
+      q: "In the Price exercise, why is Price modelled as a Value Object?",
+      options: [
+        "Because it needs a unique identifier in the database",
+        "Because it changes state over time (e.g., applied, cancelled)",
+        "Because it is defined by its value, is immutable, and has no identity of its own",
+        "Because it is the root of the Ad Aggregate"
+      ],
+      answer: 2,
+      explanation: "Price is defined solely by its value: two prices of €100 are equal. Applying a discount does not mutate the existing price — it creates a new, reduced Price. That behaviour is exactly the immutability characteristic of Value Objects."
+    },
+    // ── Aggregate ───────────────────────────────────────────────────────────
+    {
+      category: 'aggregate',
+      q: "A Proposal is contained inside an Ad. Who is responsible for enforcing that a proposal can only be accepted while in WAITING state?",
+      options: [
+        "The application service",
+        "The database via SQL constraints",
+        "The Aggregate root (Ad)",
+        "An external validator"
+      ],
+      answer: 2,
+      explanation: "The Aggregate root is the sole entry point for all state changes within the Aggregate. It is responsible for validating business invariants — including state-machine rules such as 'a Proposal can only be accepted when in WAITING state'."
+    },
+    {
+      category: 'aggregate',
+      q: "Can two distinct Ads be modified in the same transaction?",
+      options: [
+        "Yes, it is recommended for performance",
+        "No, each Aggregate defines its own transactional boundary",
+        "Yes, if they belong to the same Bounded Context",
+        "No, because they are immutable"
+      ],
+      answer: 1,
+      explanation: "A fundamental rule of Aggregates: one transaction, one Aggregate. Each Aggregate defines its own transactional boundary. Modifying two Aggregates in a single transaction often signals a design issue or a missing domain event."
+    },
+    {
+      category: 'aggregate',
+      q: "A musician applies a 20% discount on the price of an Ad. Which DDD patterns are involved?",
+      options: [
+        "Ad = Value Object, Price = Entity, Discount = Aggregate",
+        "Ad = Aggregate root, Price = Value Object, Discount = Value Object",
+        "Ad = Entity, Price = Aggregate, Discount = Entity",
+        "Ad = Aggregate root, Price = Entity, Discount = Value Object"
+      ],
+      answer: 1,
+      explanation: "Ad is the Aggregate root — it orchestrates everything and enforces invariants. Price and Discount are both defined by their value with no identity of their own, making them Value Objects."
+    },
+    {
+      category: 'aggregate',
+      q: "What is the role of an Aggregate in DDD?",
+      options: [
+        "It exposes its inner entities directly to optimise performance",
+        "It clusters VOs and/or entities, guarantees consistency, and defines transactional boundaries",
+        "It is a synonym for an application service in hexagonal architecture",
+        "It replaces the database by storing state in memory"
+      ],
+      answer: 1,
+      explanation: "An Aggregate is a cluster of VOs and/or entities forming a consistent unit. Its root (Aggregate Root) is the sole entry point and is responsible for invariants. It also defines transactional boundaries: one transaction should modify only one Aggregate."
+    }
+  ];
+
+  const SAMPLING = [
+    { category: 'ddd', count: 4, label: '🗺️ DDD' },
+    { category: 'entity', count: 2, label: '🔖 Entity' },
+    { category: 'vo', count: 2, label: '💎 Value Object' },
+    { category: 'aggregate', count: 2, label: '🧩 Aggregate' },
+  ];
+  const TOTAL = SAMPLING.reduce((s, g) => s + g.count, 0);
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildQuestions() {
+    const byCategory = {};
+    POOL.forEach(q => {
+      if (!byCategory[q.category]) {
+        byCategory[q.category] = [];
+      }
+      byCategory[q.category].push(q);
+    });
+    const picked = [];
+    SAMPLING.forEach(({ category, count }) => {
+      shuffle(byCategory[category]).slice(0, count).forEach(q => picked.push(q));
+    });
+    return shuffle(picked);
+  }
+
+  let questions = buildQuestions();
+  let current = 0, score = 0, answered = false, results = [];
+
+  const qNumber = document.getElementById('question-number');
+  const qText = document.getElementById('question-text');
+  const optionsEl = document.getElementById('options');
+  const explanEl = document.getElementById('explanation');
+  const nextBtn = document.getElementById('next-btn');
+  const pBar = document.getElementById('progress-bar');
+  const pText = document.getElementById('progress-text');
+  const scoreLive = document.getElementById('score-live');
+  const quizCard = document.getElementById('quiz-card');
+  const resultsEl = document.getElementById('results');
+
+  function render() {
+    const q = questions[current];
+    answered = false;
+    nextBtn.disabled = true;
+    nextBtn.textContent = current === questions.length - 1 ? 'See results →' : 'Next →';
+
+    qNumber.textContent = `Question ${current + 1} of ${questions.length}`;
+    qText.textContent = q.q;
+    explanEl.classList.remove('show');
+
+    optionsEl.innerHTML = '';
+    ['A', 'B', 'C', 'D'].forEach((label, i) => {
+      const div = document.createElement('div');
+      div.className = 'option';
+      div.innerHTML = `<span class="badge">${label}</span><span>${q.options[i]}</span>`;
+      div.addEventListener('click', () => select(i, div));
+      optionsEl.appendChild(div);
+    });
+
+    pText.textContent = `Question ${current + 1} / ${questions.length}`;
+    pBar.style.width = `${(current / questions.length) * 100}%`;
+    scoreLive.textContent = `Score: ${score}`;
+  }
+
+  function select(index, el) {
+    if (answered) {
+      return;
+    }
+    answered = true;
+
+    const q = questions[current];
+    optionsEl.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+
+    const correct = index === q.answer;
+    el.classList.add(correct ? 'correct' : 'wrong');
+    if (!correct) {
+      optionsEl.querySelectorAll('.option')[q.answer].classList.add('correct');
+    }
+    if (correct) {
+      score++;
+    }
+
+    results.push({ question: q.q, correct, correctAnswer: q.options[q.answer] });
+    explanEl.innerHTML = `<strong>💡 Explanation:</strong> ${q.explanation}`;
+    explanEl.classList.add('show');
+    nextBtn.disabled = false;
+    scoreLive.textContent = `Score: ${score}`;
+  }
+
+  nextBtn.addEventListener('click', () => {
+    if (++current >= questions.length) {
+      showResults();
+    } else {
+      render();
+    }
+  });
+
+  function showResults() {
+    pBar.style.width = '100%';
+    quizCard.style.display = 'none';
+    document.getElementById('progress-wrap').style.display = 'none';
+    resultsEl.classList.add('show');
+
+    document.getElementById('score-number').textContent = score;
+
+    const [title, subtitle] =
+      score === TOTAL ? ['🏆 Perfect score!', 'You have mastered Domain-Driven Design. Congratulations!'] :
+        score >= 8 ? ['🎸 Excellent result!', 'You have a strong grasp of the key DDD concepts from the workshop.'] :
+          score >= 5 ? ['🥁 Not bad!', "A few concepts are worth revisiting. Give it another try!"] :
+            ['📖 Keep studying…', "Don't worry — review the slides and retake the quiz!"];
+
+    document.getElementById('results-title').textContent = title;
+    document.getElementById('results-subtitle').textContent = subtitle;
+
+    const list = document.getElementById('results-list');
+    results.forEach((r, i) => {
+      const item = document.createElement('div');
+      item.className = 'result-item';
+      item.innerHTML = `
+        <span class="icon">${r.correct ? '✅' : '❌'}</span>
+        <div class="q">
+          <strong>Q${i + 1}. ${r.question}</strong>
+          ${r.correct ? '' : `<span>Correct answer: ${r.correctAnswer}</span>`}
+        </div>`;
+      list.appendChild(item);
+    });
+  }
+
+  function restart() {
+    questions = buildQuestions();
+    current = 0;
+    score = 0;
+    answered = false;
+    results = [];
+    resultsEl.classList.remove('show');
+    quizCard.style.display = '';
+    document.getElementById('progress-wrap').style.display = '';
+    render();
+  }
+
+  render();
+</script>
+</body>
+</html>
