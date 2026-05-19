@@ -3,7 +3,7 @@
 theme: default
 # random image from a curated Unsplash collection by Anthony
 # like them? see https://unsplash.com/collections/94734566/slidev
-background: ./assets/backgrounds/title.png
+background: ./assets/backgrounds/title.svg
 # some information about your slides (markdown enabled)
 title: Tech days 2025 - DDD Workshop
 info: |
@@ -98,14 +98,6 @@ mdc: true
         0% 75%,  /* Point milieu-gauche (bas) */
         0% 21%   /* Point milieu-gauche (haut) */
     );
-  }
-  .source {
-    position: fixed;
-    bottom: 0rem;
-    right: 1rem;
-    font-size: 0.8rem;
-    color: black;
-    opacity: 0.6;
   }
  h3 {
     font-family: 'Montserrat', sans-serif;
