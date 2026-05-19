@@ -2,6 +2,7 @@
 layout: center
 class: text-center
 ---
+<div class="absolute inset-0" style="background-image: url('../assets/backgrounds/background_4.svg'); background-size: cover;"></div>
 
 ## Wrap-up
 
@@ -10,6 +11,11 @@ class: text-center
 layout: image-left
 image: ../assets/guitar.jpg
 ---
+<div class="absolute inset-y-0 right-0 w-1/2" style="background-image: url('../assets/backgrounds/background_4.svg'); background-size: cover; background-position: right;"></div>
+<div class="relative z-10">
+
+<br>
+<br>
 
 ## Domain Driven Design
 
@@ -20,6 +26,7 @@ image: ../assets/guitar.jpg
 <h3 v-click>Not a framework...</h3>
 <h3 v-click>more like a toolbox</h3>
 <h3 v-click>not only code</h3>
+</div>
 
 <!--
 
@@ -45,6 +52,13 @@ layout: image-right
 image: ../assets/bass.jpg
 ---
 
+<div class="absolute inset-0 w-1/2" style="background-image: url('../assets/backgrounds/background_3.svg'); background-size: cover;"></div>
+
+<div class="relative z-10">
+
+<br>
+<br>
+
 ## Warnings
 
 <br>
@@ -57,6 +71,8 @@ image: ../assets/bass.jpg
 <h3 v-click>iterative</h3>
 <h3 v-click>be careful of the "by the book"</h3>
 
+</div>
+
 <!--
 
 -->
@@ -64,6 +80,11 @@ image: ../assets/bass.jpg
 layout: image-left
 image: ../assets/drums.jpg
 ---
+<div class="absolute inset-y-0 right-0 w-1/2" style="background-image: url('../assets/backgrounds/background_4.svg'); background-size: cover; background-position: right;"></div>
+<div class="relative z-10">
+
+<br>
+<br>
 
 ## What about legacy code?
 
@@ -75,6 +96,7 @@ image: ../assets/drums.jpg
 <h3 v-click>move invariants</h3>
 <h3 v-click>identify and isolate bounded contexts</h3>
 
+</div>
 <!--
 Comment migrer un legacy vers du DDD ?
 
@@ -92,11 +114,14 @@ On n'est pas obligé d'utiliser tous les patterns DDD.
 layout: center
 class: text-center
 ---
+<div class="absolute inset-0" style="background-image: url('../assets/backgrounds/background_4.svg'); background-size: cover;"></div>
 
 ## Last words
 
+<div class="relative z-10">
 <br>
 <br>
 <br>
 
 <div v-click><i>Take care of your model if you don't want to eat your cat's sh*t</i></div>
+</div>
